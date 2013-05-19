@@ -56,7 +56,14 @@ class Base:
 		dialog.destroy()	
 	
         #Converting png files to individual pdf files		
-	def convert(self,widget):										
+	def convert(self,widget):
+		md1= gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR,gtk.BUTTONS_CLOSE, "Error while removing pdfs")
+		cmnd4="rm -fr tmp"
+		flag=os.system(cmnd4)		
+		if flag!=0:
+			md1.run()
+			md1.destroy()
+			return											
 		flag=1
 		if not os.path.isdir("tmp"):
 		  print"creating tmp folder"
@@ -64,7 +71,7 @@ class Base:
 		j=100
 		for p in self.filelist:		
 			print p
-			cmnd = "convert \""+p+"\" tmp/"+str(j)+"_temp.pdf "
+			cmnd = "convert '"+p+"' 'tmp/"+str(j)+"_temp.pdf '"
 			flag=os.system(cmnd)
 			j=j+1
 		md1= gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR,gtk.BUTTONS_CLOSE, "Error while creating pdf")
@@ -74,7 +81,7 @@ class Base:
 			return
                 #Merging pdf files to a single pdf files
                 md1= gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR,gtk.BUTTONS_CLOSE, "Error while merging pdf")
-		cmnd2="pdftk tmp/*.pdf cat output tmp/file_merged.pdf"		
+		cmnd2="pdftk tmp/*.pdf cat output 'tmp/"+self.out2+"_file_merged.pdf'"		
 		flag=os.system(cmnd2)
 		if flag!=0:
 			md1.run()
@@ -82,34 +89,20 @@ class Base:
 			return
                 #Converting pdf file to djvu file
                 md1= gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR,gtk.BUTTONS_CLOSE, "Error while creating djvu")			
-		cmnd3="pdf2djvu -o "+self.outputfilename+".djvu tmp/file_merged.pdf"		
+		cmnd3="pdf2djvu -o "+self.outputfilename+".djvu 'tmp/"+self.out2+"_file_merged.pdf'"		
 		flag=os.system(cmnd3)
 		if flag!=0:
 			md1.run()
 			md1.destroy()
 			return
 		j=100
-		for p in self.filelist:
-                        #Removing unwanted individual pdf files
-                        md1= gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR,gtk.BUTTONS_CLOSE, "Error while removing pdfs")
-			cmnd4="rm tmp/"+str(j)+"_temp.pdf"						
-			flag=os.system(cmnd4)
-			j=j+1
+		md1= gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR,gtk.BUTTONS_CLOSE, "Error while removing pdfs")
+		cmnd4="rm -fr tmp"
+		flag=os.system(cmnd4)		
 		if flag!=0:
 			md1.run()
 			md1.destroy()
-			return
-		cmnd5="rm tmp/file_merged.pdf"									
-		#Removing  unwanted merged pdf file
-		flag=os.system(cmnd5)
-		#Removing temp directory
-		cmnd6 = "rmdir tmp"		
-		if os.path.isdir("tmp"):
-		  flag=os.system(cmnd6)
-		if flag!=0:
-			md1.run()
-			md1.destroy()
-			return
+			return		
 		md = gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO,gtk.BUTTONS_CLOSE, "Successfully Converted")
 		md.run()		
 		#Displaying successful message
